@@ -1,0 +1,15 @@
+# Netlify config for the static crypto store.
+# This declares the serverless-functions directory for Netlify *builds* / `netlify deploy` (CLI).
+#
+# IMPORTANT (learned 2026-10-20): a manual zip deploy through the Netlify API
+# (`POST /sites/{id}/deploys` with a raw zip) does NOT bundle ES-module `.mjs` functions,
+# even with this file present — the deploy ends up with `available_functions: null` and
+# `/.netlify/functions/*` returns 404. To keep the chat + order functions:
+#   * deploy with the Netlify CLI (`netlify deploy --dir=. --functions=netlify/functions`), or
+#   * restore a prior deploy that already has them (`POST /sites/{id}/deploys/{id}/restore`),
+#     which is what is live today.
+# The store still takes orders without the functions: payment is verified client-side on-chain
+# and the emailed receipt is the delivery ticket. The functions only add the server-side order
+# log + the sales-support chat.
+[functions]
+  directory = "netlify/functions"

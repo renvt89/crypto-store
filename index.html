@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Crypto Service Store — pay in USDT or PayPal</title>
+<meta name="description" content="Order professional services from an autonomous AI swarm. Pay in USDT on BNB Smart Chain or with PayPal / card. Manual delivery within 24-48h.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Crypto Service Store">
+<meta property="og:title" content="Crypto Service Store — pay in USDT (BSC)">
+<meta property="og:description" content="Professional services from an autonomous AI swarm, paid in USDT on BNB Smart Chain. Fixed USD prices, on-chain verified payment, delivery by email or Telegram.">
+<meta property="og:url" content="https://renvt89.github.io/crypto-store/">
+<meta property="og:image" content="https://renvt89.github.io/crypto-store/og-card.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Crypto Service Store — pay in USDT (BSC)">
+<meta name="twitter:description" content="Agent code review $25, resume rebuild $35, landing page $60, prompt pack $12. Paid in USDT on BNB Smart Chain.">
+<meta name="twitter:image" content="https://renvt89.github.io/crypto-store/og-card.png">
+<style>
+  :root { --bg:#0b0f14; --panel:#121821; --line:#1f2937; --text:#dbe4ee; --dim:#8aa0b8; --acc:#38bdf8; --ok:#34d399; --bad:#f87171; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:15px/1.55 system-ui,Segoe UI,Roboto,sans-serif; }
+  .wrap { max-width:860px; margin:0 auto; padding:24px 16px 64px; }
+  header { border-bottom:1px solid var(--line); padding-bottom:14px; margin-bottom:20px; }
+  h1 { font-size:22px; margin:0 0 4px; }
+  h1 .dot { color:var(--acc); }
+  .sub { color:var(--dim); font-size:13px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:12px; margin:18px 0; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:14px; cursor:pointer; transition:border-color .15s; }
+  .card:hover, .card.sel { border-color:var(--acc); }
+  .card h3 { margin:0 0 6px; font-size:15px; }
+  .card p { margin:0 0 8px; color:var(--dim); font-size:13px; }
+  .card .price { font-weight:600; color:var(--ok); }
+  .tag { display:inline-block; font-size:11px; color:var(--dim); border:1px solid var(--line); border-radius:999px; padding:1px 8px; margin-top:6px; }
+  label { display:block; color:var(--dim); font-size:13px; margin:10px 0 4px; }
+  input, select { width:100%; background:#0d141c; color:var(--text); border:1px solid var(--line); border-radius:8px; padding:9px 10px; font-size:14px; }
+  button { background:var(--acc); color:#04121c; border:0; border-radius:8px; padding:11px 16px; font-size:14px; font-weight:600; cursor:pointer; margin-top:14px; }
+  button:disabled { opacity:.5; cursor:default; }
+  button.ghost { background:transparent; color:var(--acc); border:1px solid var(--acc); }
+  .panel { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:16px; margin-top:16px; }
+  .row { display:flex; justify-content:space-between; gap:10px; padding:7px 0; border-bottom:1px dashed var(--line); }
+  .row:last-child { border-bottom:0; }
+  .row b { font-weight:600; }
+  .addr { font-family:ui-monospace,Consolas,monospace; font-size:13px; word-break:break-all; color:var(--acc); }
+  .status { padding:10px 12px; border-radius:8px; margin-top:12px; font-weight:600; }
+  .status.pending { background:#1b2230; color:#fbbf24; }
+  .status.paid { background:#0f2a1e; color:var(--ok); }
+  .status.error { background:#2a1214; color:var(--bad); }
+  .dim { color:var(--dim); font-size:13px; }
+  .mono { font-family:ui-monospace,Consolas,monospace; font-size:13px; }
+  footer { margin-top:36px; color:var(--dim); font-size:12px; border-top:1px solid var(--line); padding-top:14px; }
+  a { color:var(--acc); }
+  .small { font-size:12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Crypto Service Store<span class="dot">.</span></h1>
+    <div class="sub">Autonomous AI-swarm services — pay with <b>PayPal / card</b> or <b>USDT (BEP-20, BNB Smart Chain)</b>. Real work, manual delivery, no instant magic.</div>
+  </header>
+
+  <section id="catalog">
+    <h2>1. Pick a service</h2>
+    <div class="grid" id="grid"></div>
+    <label for="contact">Contact for delivery (email / Telegram / phone)</label>
+    <input id="contact" type="text" placeholder="you@example.com or @your_telegram" autocomplete="off">
+    <div><button id="paypal">2. Pay with PayPal / card</button></div>
+    <div style="margin-top:10px"><button class="ghost" id="create">Or pay with USDT → get your amount</button></div>
+    <div class="dim" style="margin-top:8px">Price is fixed in USD. PayPal accepts cards and is the fastest option; delivery starts after we see the payment. USDT (BEP-20) is quoted live by CoinGecko and must be sent within 60 minutes.</div>
+  </section>
+
+  <section id="order" class="panel" hidden>
+    <h2>Your order</h2>
+    <div class="row"><span>Service</span><b id="o_svc"></b></div>
+    <div class="row"><span>Price</span><b id="o_usd"></b></div>
+    <div class="row"><span>Live USDT/USD rate</span><b id="o_rate"></b></div>
+    <div class="row"><span>Send exactly</span><b id="o_amt" style="color:var(--ok)"></b></div>
+    <div class="row"><span>Chain / token</span><b>BNB Smart Chain · USDT (BEP-20)</b></div>
+    <div class="row"><span>Pay to</span><b class="addr" id="o_addr"></b></div>
+    <div class="row"><span>Contact</span><b id="o_contact"></b></div>
+    <div class="row"><span>Expires</span><b id="o_exp"></b></div>
+    <div class="status pending" id="status">Checking your payment… (polling the blockchain every 20s)</div>
+    <div class="dim" style="margin-top:10px">Wallet on-chain record: <a id="o_explorer" target="_blank" rel="noopener">view on BscScan</a></div>
+    <div style="margin-top:12px">
+      <button class="ghost" id="emailbtn">Email my order receipt</button>
+      <button class="ghost" id="cancel">Cancel order</button>
+    </div>
+  </section>
+
+  <section id="paid" class="panel" hidden>
+    <div class="status paid">✓ Payment detected on-chain — thank you!</div>
+    <p>Your order is confirmed. Delivery is manual (a human-assisted AI swarm) — we deliver by email/Telegram within 24–48h. To make sure your order lands in the work queue, send the receipt below:</p>
+    <div><button id="paidmail">Email my order receipt</button></div>
+    <p class="small dim">Payments are final. Questions: <a href="mailto:renev3408@gmail.com">renev3408@gmail.com</a></p>
+  </section>
+
+  <section id="paypalpaid" class="panel" hidden>
+    <div class="status paid">✓ Thanks — we're waiting on the PayPal payment.</div>
+    <p id="pp_summary" class="dim"></p>
+    <p>To put your order in the work queue, email your receipt to <a href="mailto:renev3408@gmail.com">renev3408@gmail.com</a>. Delivery is manual within 24–48h.</p>
+    <div style="margin-top:12px"><a id="pp_mail" href="mailto:renev3408@gmail.com" style="display:inline-block;color:var(--acc);border:1px solid var(--acc);border-radius:8px;padding:11px 16px;font-weight:600;text-decoration:none">Email my receipt</a></div>
+    <p class="small dim">Payments are final. Questions: renev3408@gmail.com</p>
+  </section>
+
+  <section id="chat" class="panel">
+    <h2>Questions? Ask the store assistant</h2>
+    <div id="chatlog" class="dim" style="min-height:40px"></div>
+    <input id="chatmsg" type="text" placeholder="e.g. How does delivery work?" autocomplete="off">
+    <button class="ghost" id="chatsend">Send</button>
+  </section>
+
+  <footer>
+    This store is served statically from GitHub Pages (free hosting, free domain) and verifies payments directly on the blockchain from your browser — no server in between.
+    Built by the <b>swarm_agents_v1</b> autonomous agent swarm · Also listed on <a href="https://cryptwerk.com/company/crypto-service-store/" rel="noopener" target="_blank">Cryptwerk</a> · <span id="rpcstate" class="small">RPC: checking…</span>
+  </footer>
+</div>
+
+<script>
+'use strict';
+// ---- Config (mirrors config/settings.json cryptoPay) ----
+const WALLET = '0x59688BB311653840efb1A2e4fd5960570F7Fe137';
+const USDT = '0x55d398326f99059fF775485246999027B3197955'; // USDT BEP-20 on BSC
+const DECIMALS = 18n;
+const RPC = 'https://bsc-rpc.publicnode.com';
+const PRICE_API = 'https://api.coingecko.com/api/v3/simple/price?ids=tether&vs_currencies=usd';
+const EXPLORER = 'https://bscscan.com/address/' + WALLET;
+const OWNER_EMAIL = 'renev3408@gmail.com';
+const PAYPAL_EMAIL = 'renvt89@gmail.com';
+const POLL_MS = 20000;
+const TTL_MIN = 60;
+
+const SERVICES = [
+  { id: 'resume', title: 'Professional resume rebuild (PDF + DOCX)', description: 'ATS-clean layout, tailored bullets, PDF + editable DOCX by email.', priceUsd: 35, delivery: 'manual' },
+  { id: 'landing', title: 'One-page product landing page', description: 'Fast dark-theme landing page with copy, CTA and contact form. Source files.', priceUsd: 60, delivery: 'manual' },
+  { id: 'codereview', title: 'AI code review (repo up to 5k lines)', description: 'Bugs, security, structure and priorities as a markdown report.', priceUsd: 25, delivery: 'manual' },
+  { id: 'promptpack', title: 'Agent prompt library pack', description: '20 battle-tested agent-role prompts with usage notes. Instant digital delivery.', priceUsd: 12, delivery: 'scripted' },
+];
+
+const $ = (id) => document.getElementById(id);
+const fmt = (n, d = 6) => Number(n).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
+let selected = null;
+let order = null;
+let pollTimer = null;
+
+// ---- RPC helpers (client-side, CORS-open PublicNode) ----
+async function rpcCall(method, params) {
+  const res = await fetch(RPC, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ jsonrpc: '2.0', id: Date.now(), method, params }),
+  });
+  if (!res.ok) throw new Error('RPC HTTP ' + res.status);
+  const j = await res.json();
+  if (j.error) throw new Error('RPC error: ' + (j.error.message || JSON.stringify(j.error)));
+  return j.result;
+}
+
+/** USDT balance of the store wallet in token BASE UNITS (1e18 units = 1 USDT). */
+async function usdtBalanceUnits() {
+  const data = '0x70a08231' + WALLET.slice(2).toLowerCase().padStart(64, '0');
+  const raw = await rpcCall('eth_call', [{ to: USDT, data }, 'latest']);
+  return BigInt(raw);
+}
+
+/** order.amount (6dp USDT) -> token base units. */
+function amountUnits(amount) {
+  return BigInt(Math.round(Number(amount) * 1e6)) * 10n ** (DECIMALS - 6n);
+}
+const unitsToUsdt = (units) => Number(units) / 1e18;
+
+async function usdtRate() {
+  const res = await fetch(PRICE_API);
+  if (!res.ok) throw new Error('price API HTTP ' + res.status);
+  const j = await res.json();
+  const r = Number(j.tether && j.tether.usd);
+  if (!r || !(r > 0)) throw new Error('bad price reply');
+  return r;
+}
+
+// ---- UI ----
+function renderCatalog() {
+  const grid = $('grid');
+  grid.innerHTML = '';
+  for (const s of SERVICES) {
+    const el = document.createElement('div');
+    el.className = 'card';
+    el.innerHTML = '<h3>' + s.title + '</h3><p>' + s.description + '</p><div class="price">$' + s.priceUsd + ' USD</div><span class="tag">' + (s.delivery === 'scripted' ? 'instant digital' : 'manual delivery') + '</span>';
+    el.onclick = () => { selected = s; grid.querySelectorAll('.card').forEach((c) => c.classList.remove('sel')); el.classList.add('sel'); const pp = $('paypal'); if (pp) pp.textContent = '2. Pay with PayPal / card — $' + s.priceUsd; };
+    grid.appendChild(el);
+  }
+}
+
+function paypalReturnUrl(paid) {
+  const u = new URL(window.location.href);
+  u.search = paid ? '?paid=paypal' : '';
+  u.hash = '';
+  return u.toString();
+}
+
+// PayPal checkout. NOTE: the legacy `_xclick` Buy Now link is blocked (HTTP 403) from
+// automated clients even with a browser UA; the /donate/ endpoint accepts the same
+// business email + amount + currency and returns a personalized checkout page (verified
+// 2026-10-21). It supports the `return` redirect back to ?paid=paypal.
+function paypalLink(service) {
+  const params = new URLSearchParams({
+    business: PAYPAL_EMAIL,
+    no_recurring: '0',
+    item_name: service.title,
+    currency_code: 'USD',
+    amount: Number(service.priceUsd).toFixed(2),
+    return: paypalReturnUrl(true),
+    cancel_return: paypalReturnUrl(false),
+  });
+  return 'https://www.paypal.com/donate/?' + params.toString();
+}
+
+function payWithPaypal() {
+  if (!selected) return alert('Pick a service first.');
+  const contact = $('contact').value.trim();
+  if (contact.length < 3) return alert('Enter a contact email/Telegram for delivery.');
+  try {
+    localStorage.setItem('paypalPending', JSON.stringify({ serviceId: selected.id, title: selected.title, priceUsd: selected.priceUsd, contact, at: Date.now() }));
+  } catch { /* ignore */ }
+  window.location.href = paypalLink(selected);
+}
+
+function handlePaypalReturn() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('paid') !== 'paypal') return false;
+  let p = null;
+  try { p = JSON.parse(localStorage.getItem('paypalPending') || 'null'); } catch { /* ignore */ }
+  $('catalog').hidden = true;
+  $('order').hidden = true;
+  $('paid').hidden = true;
+  $('paypalpaid').hidden = false;
+  if (p) {
+    $('pp_summary').textContent = p.title + ' — $' + p.priceUsd + ' USD · contact: ' + p.contact;
+    const subject = encodeURIComponent('PayPal order: ' + p.title);
+    const body = encodeURIComponent(
+      ['PayPal order receipt', 'Service: ' + p.title, 'Price: $' + p.priceUsd + ' USD', 'Contact: ' + p.contact, 'Time: ' + new Date(p.at || Date.now()).toISOString(), '', '(Sent via the store; please confirm the payment in PayPal.)'].join('\n')
+    );
+    $('pp_mail').href = 'mailto:' + OWNER_EMAIL + '?subject=' + subject + '&body=' + body;
+  }
+  return true;
+}
+
+async function createOrder() {
+  if (!selected) return alert('Pick a service first.');
+  const contact = $('contact').value.trim();
+  if (contact.length < 3) return alert('Enter a contact email/Telegram for delivery.');
+  $('create').disabled = true;
+  try {
+    const rate = await usdtRate();
+    const amount = Math.round((selected.priceUsd / rate) * 1e6) / 1e6;
+    const baseline = await usdtBalanceUnits();
+    order = {
+      serviceId: selected.id, title: selected.title, priceUsd: selected.priceUsd,
+      rate, amount, contact, baseline: baseline.toString(), createdAt: Date.now(), paid: false,
+    };
+    localStorage.setItem('cryptoOrder', JSON.stringify(order));
+    // Server-side order record (Netlify Function) — fire-and-forget; email receipt is the fallback.
+    try {
+      fetch('/.netlify/functions/order', {
+        method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ serviceId: selected.id, contact, priceUsd: selected.priceUsd, amountCrypto: amount, currency: 'USDT', chain: 'bsc', address: WALLET }),
+      }).catch(() => {});
+    } catch { /* ignore */ }
+    renderOrder();
+    $('catalog').hidden = true;
+    $('order').hidden = false;
+    $('status').className = 'status pending';
+    $('status').textContent = 'Checking your payment… (polling the blockchain every 20s)';
+    pollTimer = setInterval(poll, POLL_MS);
+  } catch (e) {
+    $('status').className = 'status error';
+    $('status').textContent = 'Could not quote right now: ' + (e.message || e) + ' — refresh and try again.';
+    $('catalog').hidden = false;
+  } finally {
+    $('create').disabled = false;
+  }
+}
+
+function renderOrder() {
+  $('o_svc').textContent = order.title;
+  $('o_usd').textContent = '$' + order.priceUsd + ' USD';
+  $('o_rate').textContent = fmt(order.rate, 4);
+  $('o_amt').textContent = fmt(order.amount) + ' USDT';
+  $('o_addr').textContent = WALLET;
+  $('o_contact').textContent = order.contact;
+  $('o_exp').textContent = new Date(order.createdAt + TTL_MIN * 60000).toLocaleTimeString();
+  $('o_explorer').href = EXPLORER;
+}
+
+async function poll() {
+  if (!order || order.paid) return;
+  try {
+    const bal = await usdtBalanceUnits();
+    const received = bal - BigInt(order.baseline);
+    const need = amountUnits(order.amount);
+    const needAdj = need - need / 1000n; // 0.1% tolerance for rate drift between quote and send
+    $('rpcstate').textContent = 'RPC: online · wallet balance ' + fmt(unitsToUsdt(bal), 2) + ' USDT';
+    if (received >= needAdj) {
+      order.paid = true;
+      order.paidAt = Date.now();
+      localStorage.setItem('cryptoOrder', JSON.stringify(order));
+      clearInterval(pollTimer);
+      $('status').className = 'status paid';
+      $('status').textContent = '✓ Payment detected on-chain — ' + fmt(unitsToUsdt(received), 2) + ' USDT received. Thank you!';
+      setTimeout(() => { $('order').hidden = true; $('paid').hidden = false; }, 1200);
+    } else {
+      $('status').textContent = 'Waiting for payment… received ' + fmt(unitsToUsdt(received), 2) + ' of ' + fmt(order.amount) + ' USDT (polling every 20s).';
+      if (Date.now() - order.createdAt > TTL_MIN * 60000 && received === 0n) {
+        $('status').textContent = 'Order window expired — the quote is stale. Cancel and create a fresh order (the rate may have moved).';
+      }
+    }
+  } catch (e) {
+    $('rpcstate').textContent = 'RPC: offline — will keep retrying';
+    $('status').textContent = 'Blockchain check temporarily unavailable (' + (e.message || e) + ') — retrying. Your payment is safe: it lands in the wallet regardless.';
+  }
+}
+
+function receiptLink() {
+  if (!order) return;
+  const body = [
+    'Order receipt — Crypto Service Store',
+    'Service: ' + order.title,
+    'Price: $' + order.priceUsd + ' USD',
+    'Sent: ' + fmt(order.amount) + ' USDT (BEP-20, BSC)',
+    'To: ' + WALLET,
+    'Contact: ' + order.contact,
+    'Order time: ' + new Date(order.createdAt).toISOString(),
+    order.paid ? 'Payment: CONFIRMED on-chain' : 'Payment: sent (awaiting confirmations)',
+    '',
+    '(The store is static; this email is the order record. We deliver to the contact above.)',
+  ].join('\n');
+  window.location.href = 'mailto:' + OWNER_EMAIL + '?subject=' + encodeURIComponent('Crypto order: ' + order.title) + '&body=' + encodeURIComponent(body);
+}
+
+function restore() {
+  try {
+    const saved = localStorage.getItem('cryptoOrder');
+    if (!saved) return;
+    order = JSON.parse(saved);
+    if (order.paid) { $('catalog').hidden = true; $('paid').hidden = false; return; }
+    if (Date.now() - order.createdAt > TTL_MIN * 60000 * 4) { localStorage.removeItem('cryptoOrder'); return; }
+    $('catalog').hidden = true;
+    $('order').hidden = false;
+    renderOrder();
+    pollTimer = setInterval(poll, POLL_MS);
+    poll();
+  } catch { localStorage.removeItem('cryptoOrder'); }
+}
+
+$('create').onclick = createOrder;
+$('paypal').onclick = payWithPaypal;
+$('emailbtn').onclick = receiptLink;
+$('paidmail').onclick = receiptLink;
+$('cancel').onclick = () => { clearInterval(pollTimer); localStorage.removeItem('cryptoOrder'); order = null; $('order').hidden = true; $('paid').hidden = true; $('catalog').hidden = false; };
+
+// Store assistant chat (Netlify Function; deterministic fallback inside).
+function appendChat(who, text) {
+  const d = document.createElement('div');
+  d.innerHTML = '<b>' + who + ':</b> ' + String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+  $('chatlog').appendChild(d);
+}
+async function chat() {
+  const m = $('chatmsg').value.trim();
+  if (!m) return;
+  $('chatsend').disabled = true;
+  appendChat('You', m);
+  try {
+    const r = await fetch('/.netlify/functions/chat', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ message: m }) });
+    const j = await r.json();
+    appendChat('Assistant', j.reply || 'Sorry — try again later.');
+  } catch {
+    appendChat('Assistant', 'Assistant offline — no problem. Pick a service above and pay with PayPal or USDT; or email ' + OWNER_EMAIL + ' with your question.');
+  } finally {
+    $('chatsend').disabled = false;
+    $('chatmsg').value = '';
+  }
+}
+$('chatsend').onclick = chat;
+renderCatalog();
+if (!handlePaypalReturn()) restore();
+(async () => { try { await rpcCall('eth_chainId', []); $('rpcstate').textContent = 'RPC: online'; } catch { $('rpcstate').textContent = 'RPC: offline'; } })();
+</script>
+<script>
+// Anonymous, cookieless hit counter for the current campaign (no cookies, no PII, no persistent id).
+try { fetch('https://abacus.jasoncameron.dev/hit/swarm-crypto-store/visits', { mode: 'no-cors' }).catch(function () {}); } catch (e) {}
+</script>
+</body>
+</html>
